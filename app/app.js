@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+var request = require('request');
 var app = express();
 
 // view engine setup
@@ -27,8 +28,67 @@ app.get('/', function(req, res){
 });
 
 app.get('/fc/', function(req, res){
+    
+    var handle = req.query.handle;
+
+    var qstring = 'https://api.fullcontact.com/v2/person.json?twitter='+handle+'&apiKey=a4b353a65c4863d0';
+
+
+  //GET EVENTS ASSOCIATED WITH USER
+  request(qstring, function (error, response, body) {
+        
+        console.log('Getting owned_events..');
+
+        var eventsarray = [];
+
+        console.log(error);
+        //console.log(response)
+
+        if (!error && response.statusCode == 200) {
+          
+          var eventsdata = JSON.parse(body);
+          //cycle through events and add to array
+          //eventsdata.events.forEach(addEventsToArray);
+          console.log(eventsdata);
+
+          res.send(eventsdata);
+
+
+
+            // Set the headers
+            var headers = {
+                'User-Agent':       'Super Agent/0.0.1',
+                'Content-Type':     'application/x-www-form-urlencoded'
+            }
+
+            // Configure the request
+            var options = {
+                url: 'https://zapier.com/hooks/catch/ohfiy4/',
+                method: 'POST',
+                headers: headers,
+                form: eventsdata
+            }
+
+            // Start the request
+            request(options, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    // Print out the response body
+                    console.log(body)
+                }
+            })
+          //https://zapier.com/hooks/catch/ohfiy4/
+
+
+          //call user profile data after getting events
+          //finish();
+        }
+  });
+
+
+
     console.log(req.body);
-  res.send(req.body);
+    
+  //res.send(req.body);
 });
 
 
